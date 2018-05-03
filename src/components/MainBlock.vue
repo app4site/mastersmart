@@ -2,43 +2,48 @@
 .root(:class="{mobile}")
   .marks
     span.mark(
-      v-for="mark in Object.keys(price)"
+      v-for="mark in price"
       :class="{selected: selectedMark === mark}"
       @click="selectedMark = mark"
-    ) {{mark}}
-  .models(v-if="Object.keys(price[selectedMark]).length > 1")
+    ) {{mark[0]}}
+  .models(v-if="selectedMark[1].length > 1")
     span.model(
-    v-for="model in Object.keys(price[selectedMark])"
+    v-for="model in selectedMark[1]"
     :class="{selected: selectedModel === model}"
     @click="selectedModel = model"
-    ) {{model}}
+    ) {{model[0]}}
   .jobs-n-image
     .jobs
-      .job(v-for="job in Object.keys(price[selectedMark][selectedModel])" v-if="job !== '_image'")
-        .name(v-html="job")
-        .price(v-html="price[selectedMark][selectedModel][job]")
-    .image(v-if="!mobile && price[selectedMark][selectedModel]['_image']")
-      img(:src="price[selectedMark][selectedModel]['_image']")
-
-
+      .job(v-for="job in selectedModel[1]" v-if="job[0] !== '_image'")
+        .name(v-html="job[0]")
+        span.price(v-html="job[1]")
+        .red
+    .image(v-if="!mobile && currImage")
+      img(:src="currImage")
 </template>
 
 <script>
 export default {
   props: {
-    price: Object,
+    price: Array,
   },
   data() {
     return {
-      selectedMark: Object.keys(this.price)[0],
+      selectedMark: this.price[0],
       selectedModel: null,
     }
+  },
+  computed: {
+    currImage() {
+      const arr = this.selectedModel[1].find(j => j[0] === '_image')
+      return arr && arr[1]
+    },
   },
   watch: {
     selectedMark: {
       immediate: true,
       handler() {
-        this.selectedModel = Object.keys(this.price[this.selectedMark])[0]
+        this.selectedModel = this.selectedMark[1][0]
       }
     }
   },
@@ -128,18 +133,30 @@ div-second-color = #dfebf1
 .job
   width 100%
 
+.job
+  position relative
+  display flex
+
 .name
 .price
   width 50%
-  display inline-block
-  padding 20px 0 16px
+  padding 14px 0 10px
   font-size 16px
   color price-text
+  border-bottom 3px solid div-second-color
+
+.red
+  position absolute
+  width 50%
+  bottom 0
+  left 0
+  border-bottom 3px solid brand
 
 .name
   text-align left
-  border-bottom 3px solid brand
+  flex 1
 .price
   text-align right
-  border-bottom 3px solid div-second-color
+  flex 0
+  white-space pre
 </style>
